@@ -1,0 +1,27 @@
+/* Category.css */
+
+.category-carousel {
+    overflow: hidden; /* ซ่อนการเลื่อนที่ไม่จำเป็น */
+  }
+  
+  .swiper-wrapper {
+    display: flex; /* แสดงเป็นแนวนอน */
+    flex-direction: row; /* แนวนอน */
+  }
+  
+  .swiper-slide {
+    flex: 0 0 auto; /* ไม่ให้ขยายหรือลดขนาด */
+    margin-right: 15px; /* ระยะห่างระหว่างหมวดหมู่ */
+    text-align: center; /* จัดกึ่งกลาง */
+  }
+  
+  .category-title {
+    margin-top: 10px; /* ระยะห่างระหว่างภาพและชื่อหมวดหมู่ */
+  }
+  
+  /* ปรับขนาดภาพให้พอดีกับหมวดหมู่ */
+  .category-carousel img {
+    width: 100px; /* กำหนดความกว้างของภาพ */
+    height: 100px; /* กำหนดความสูงของภาพ */
+  }
+  
