@@ -24,7 +24,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '', // เปลี่ยนเป็นรหัสผ่านของคุณ
-  database: 'products_db',
+  database: 'prductdb',
 });
 
 // เชื่อมต่อฐานข้อมูล
@@ -49,29 +49,29 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // API: ดึงข้อมูลสินค้า
-// app.get('/api/products', (req, res) => {
-//   const sql = 'SELECT * FROM products';
-//   db.query(sql, (err, result) => {
-//     if (err) {
-//       console.error('Error fetching products:', err);
-//       res.status(500).send('Error fetching products');
-//       return;
-//     }
+app.get('/api/products', (req, res) => {
+  const sql = 'SELECT * FROM tblproduct'; // เปลี่ยนชื่อตาราง
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('Error fetching products:', err);
+      res.status(500).send('Error fetching products');
+      return;
+    }
 
-//     // เพิ่ม URL เซิร์ฟเวอร์ในเส้นทางรูปภาพ
-//     const products = result.map((product) => ({
-//       ...product,
-//       image: product.image ? `http://localhost:${PORT}${product.image}` : null,
-//     }));
+    // เพิ่ม URL เซิร์ฟเวอร์ในเส้นทางรูปภาพ
+    const products = result.map((product) => ({
+      ...product,
+      image: product.image ? `http://localhost:${PORT}${product.image}` : null,
+    }));
 
-//     res.json(products);
-//   });
-// });
+    res.json(products);
+  });
+});
 
 // API: ดึงข้อมูลสินค้าตาม ID
 app.get('/api/products/:id', (req, res) => {
   const { id } = req.params;
-  const sql = 'SELECT * FROM products WHERE id = ?';
+  const sql = 'SELECT * FROM tblproduct WHERE id = ?'; // เปลี่ยนชื่อตาราง
 
   db.query(sql, [id], (err, result) => {
     if (err) {
@@ -103,7 +103,7 @@ app.post('/api/products', upload.single('image'), (req, res) => {
   const image = req.file ? `/uploads/${req.file.filename}` : null;
 
   // ตรวจสอบว่า product_code ซ้ำหรือไม่
-  const checkCodeSql = 'SELECT * FROM products WHERE product_code = ?';
+  const checkCodeSql = 'SELECT * FROM tblproduct WHERE product_code = ?'; // เปลี่ยนชื่อตาราง
   db.query(checkCodeSql, [product_code], (err, result) => {
     if (err) {
       console.error('Error checking product_code:', err);
@@ -118,7 +118,7 @@ app.post('/api/products', upload.single('image'), (req, res) => {
 
     // หากไม่ซ้ำ ให้เพิ่มสินค้า
     const sql = `
-      INSERT INTO products (product_code, title, image, rating, original_price, discounted_price, discount, description, category, quantity)
+      INSERT INTO tblproduct (product_code, title, image, rating, original_price, discounted_price, discount, description, category, quantity)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
@@ -133,7 +133,6 @@ app.post('/api/products', upload.single('image'), (req, res) => {
   });
 });
 
-
 // API: แก้ไขข้อมูลสินค้า
 app.put('/api/products/:id', upload.single('image'), (req, res) => {
   const { id } = req.params;
@@ -142,7 +141,7 @@ app.put('/api/products/:id', upload.single('image'), (req, res) => {
   const image = req.file ? `/uploads/${req.file.filename}` : null;
 
   // ตรวจสอบว่ารหัสสินค้าซ้ำหรือไม่
-  const checkCodeSql = 'SELECT * FROM products WHERE product_code = ? AND id != ?';
+  const checkCodeSql = 'SELECT * FROM tblproduct WHERE product_code = ? AND id != ?'; // เปลี่ยนชื่อตาราง
   db.query(checkCodeSql, [product_code, id], (err, result) => {
     if (err) {
       console.error('Error checking product_code:', err);
@@ -157,7 +156,7 @@ app.put('/api/products/:id', upload.single('image'), (req, res) => {
 
     // หากไม่ซ้ำ ให้ดำเนินการอัปเดต
     let sql = `
-      UPDATE products
+      UPDATE tblproduct
       SET product_code = ?, title = ?, rating = ?, original_price = ?, discounted_price = ?, discount = ?, description = ?, category = ?, quantity = ?
     `;
     const params = [product_code, title, rating, original_price, discounted_price, discount, description, category, quantity];
@@ -185,7 +184,7 @@ app.put('/api/products/:id', upload.single('image'), (req, res) => {
 app.delete('/api/products/:id', (req, res) => {
   const { id } = req.params;
 
-  const sql = 'DELETE FROM products WHERE id = ?';
+  const sql = 'DELETE FROM tblproduct WHERE id = ?'; // เปลี่ยนชื่อตาราง
   db.query(sql, [id], (err, result) => {
     if (err) {
       console.error('Error deleting product:', err);
@@ -204,7 +203,7 @@ app.delete('/api/products/:id', (req, res) => {
 
 // API: นับจำนวนสินค้า
 app.get('/api/products/count', (req, res) => {
-  const sql = 'SELECT COUNT(*) AS count FROM products'; // คำสั่ง SQL
+  const sql = 'SELECT COUNT(*) AS count FROM tblproduct'; // เปลี่ยนชื่อตาราง
   db.query(sql, (err, result) => {
     if (err) {
       console.error('Error fetching product count:', err);
@@ -212,160 +211,74 @@ app.get('/api/products/count', (req, res) => {
       return;
     }
 
-    // ตรวจสอบผลลัพธ์
     if (result.length > 0) {
-      res.send({ count: result[0].count }); // ส่งจำนวนสินค้า
+      res.send({ count: result[0].count });
     } else {
-      res.status(404).send('Product not found'); // กรณีไม่มีสินค้า
+      res.status(404).send('Product not found');
     }
   });
 });
 
-// API endpoint to register user
-// API endpoint to register user
+// API: ลงทะเบียนผู้ใช้
 app.post('/api/register', upload.single('image'), (req, res) => {
   const { adminName, phone, email, password } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null; // ใช้ URL ของไฟล์ที่อัปโหลด
+  const image = req.file ? `/uploads/${req.file.filename}` : null;
 
-  const sql = 'INSERT INTO users (admin_name, phone, email, password, image) VALUES (?, ?, ?, ?, ?)';
+  const sql = 'INSERT INTO tbladmin (admin_name, phone, email, password, image) VALUES (?, ?, ?, ?, ?)'; // เปลี่ยนชื่อตาราง
   db.query(sql, [adminName, phone, email, password, image], (err, result) => {
     if (err) {
-      console.error('Error inserting user:', err);
-      return res.status(500).json({ error: err.message });
+      console.error('Error inserting admin:', err);
+      res.status(500).send('Server error');
+      return;
     }
-    res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+    res.status(201).send({ message: 'Admin registered successfully', adminId: result.insertId });
   });
 });
 
-// API endpoint to get user by ID
-// API endpoint to get user by ID
-app.get('/api/user/:id', (req, res) => {
-  const userId = req.params.id;
-  const sql = 'SELECT * FROM users WHERE id = ?';
-
-  db.query(sql, [userId], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    if (results.length > 0) {
-      const user = results[0];
-      user.image = user.image ? `http://localhost:${PORT}${user.image}` : null; // ส่ง URL ของรูปภาพ
-      res.json(user);
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
-  });
-});
-
-
+// API: เข้าสู่ระบบ
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
 
-  const sql = 'SELECT * FROM users WHERE email = ? AND password = ?';
+  // ตรวจสอบข้อมูลในฐานข้อมูล
+  const sql = 'SELECT * FROM tbladmin WHERE email = ? AND password = ?'; // ใช้ตาราง tbladmin
   db.query(sql, [email, password], (err, results) => {
     if (err) {
       console.error('Error logging in:', err);
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: 'Server error' });
     }
 
     if (results.length > 0) {
-      res.json({ message: 'เข้าสู่ระบบสำเร็จ', user: results[0] });
+      // หากพบผู้ใช้ที่ตรงกับข้อมูล
+      const user = results[0];
+      res.json({ message: 'เข้าสู่ระบบสำเร็จ', user });
     } else {
+      // หากไม่พบผู้ใช้
       res.status(401).json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
     }
   });
 });
 
-// API endpoint to get the latest user
-// สร้าง API เพื่อดึงผู้ใช้ล่าสุด
-// API endpoint to get the latest user
+// API: ดึงข้อมูลผู้ใช้ล่าสุด
 app.get('/api/users/latest', (req, res) => {
-  const query = 'SELECT * FROM users ORDER BY created_at DESC LIMIT 1'; 
-  db.query(query, (error, results) => {
-    if (error) {
-      return res.status(500).send('Error retrieving data');
+  const sql = 'SELECT admin_name, image FROM tbladmin ORDER BY id DESC LIMIT 1'; // ดึงข้อมูลผู้ใช้ล่าสุด
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('Error fetching latest user:', err);
+      res.status(500).send('Error fetching latest user');
+      return;
     }
-    if (results.length > 0) {
-      const user = results[0];
-      user.image = user.image ? `http://localhost:${PORT}${user.image}` : null; // ส่ง URL ของรูปภาพ
+
+    if (result.length > 0) {
+      const user = {
+        admin_name: result[0].admin_name,
+        image: result[0].image
+          ? `http://localhost:${PORT}${result[0].image}` // เพิ่ม URL เซิร์ฟเวอร์
+          : null,
+      };
       res.json(user);
     } else {
       res.status(404).send('No users found');
     }
-  });
-});
-
-
-
-// API: ดึงข้อมูลสินค้า
-app.post('/api/products', upload.single('image'), (req, res) => {
-  const { product_code, title, rating, original_price, discounted_price, discount, description, category, quantity } = req.body;
-
-  // ตรวจสอบว่ามีรูปภาพหรือไม่
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
-
-  const sql = `
-    INSERT INTO products (product_code, title, image, rating, original_price, discounted_price, discount, description, category, quantity)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(sql, [product_code, title, image, rating, original_price, discounted_price, discount, description, category, quantity], (err, result) => {
-    if (err) {
-      console.error('Error inserting product:', err);
-      res.status(500).send('Server error');
-      return;
-    }
-    res.status(201).send({ message: 'Product added successfully', productId: result.insertId });
-  });
-});
-
-
-
-app.put('/api/products/:id', upload.single('image'), (req, res) => {
-  const { id } = req.params;
-  const { product_code, title, rating, original_price, discounted_price, discount, description, category, quantity } = req.body;
-
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
-
-  let sql = `
-    UPDATE products
-    SET product_code = ?, title = ?, rating = ?, original_price = ?, discounted_price = ?, discount = ?, description = ?, category = ?, quantity = ?
-  `;
-  const params = [product_code, title, rating, original_price, discounted_price, discount, description, category, quantity];
-
-  if (image) {
-    sql += `, image = ?`;
-    params.push(image);
-  }
-
-  sql += ` WHERE id = ?`;
-  params.push(id);
-
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('Error updating product:', err);
-      res.status(500).send('Server error');
-      return;
-    }
-    res.send({ message: 'Product updated successfully' });
-  });
-});
-
-app.get('/api/products', (req, res) => {
-  const sql = 'SELECT * FROM products';
-  db.query(sql, (err, result) => {
-    if (err) {
-      console.error('Error fetching products:', err);
-      res.status(500).send('Error fetching products');
-      return;
-    }
-
-    const products = result.map((product) => ({
-      ...product,
-      image: product.image ? `http://localhost:${PORT}${product.image}` : null,
-    }));
-
-    res.json(products); // ส่งข้อมูลกลับไปยัง Frontend
   });
 });
 
